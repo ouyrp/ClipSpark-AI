@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     bailian_text_model: str = "qwen-plus"
     bailian_vision_model: str = "qwen-vl-plus"
     bailian_embedding_model: str = "text-embedding-v4"
+    bailian_asr_model: str = "paraformer-v2"
+    asr_public_base_url: str = ""
 
     storage_driver: str = "local"
     local_storage_root: str = "../../storage"

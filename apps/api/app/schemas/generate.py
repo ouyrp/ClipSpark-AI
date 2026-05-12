@@ -10,6 +10,7 @@ class GenerateRequest(BaseModel):
     aspect_ratio: str = "9:16"
     version_count: int = 3
     user_goal: Optional[str] = None
+    creative_tone: str = "auto"
 
 
 class EditPlanRead(BaseModel):

@@ -64,6 +64,7 @@ export function generatePlans(input: {
   aspectRatio: string;
   versionCount: number;
   userGoal?: string;
+  creativeTone: string;
 }) {
   return request<EditPlan[]>(`/projects/${input.projectId}/generate`, {
     method: "POST",
@@ -73,6 +74,7 @@ export function generatePlans(input: {
       aspect_ratio: input.aspectRatio,
       version_count: input.versionCount,
       user_goal: input.userGoal,
+      creative_tone: input.creativeTone,
     }),
   });
 }

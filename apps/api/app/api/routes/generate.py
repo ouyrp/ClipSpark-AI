@@ -11,7 +11,9 @@ from app.models.project import Project
 from app.schemas.generate import EditPlanRead, GenerateRequest
 from app.services.ai.bailian_provider import BailianProvider
 from app.services.ai.fallback import fallback_edit_plans
+from app.services.effects.library import effect_options_for_prompt
 from app.services.storage.local_storage import LocalStorage
+from app.services.video.analysis import analyze_asset
 from app.services.video.render_service import render_preview_clip
 
 router = APIRouter(prefix="/projects/{project_id}/generate", tags=["generate"])
@@ -39,7 +41,15 @@ def generate(project_id: str, payload: GenerateRequest, request: Request, db: Se
         "aspect_ratio": payload.aspect_ratio,
         "version_count": payload.version_count,
         "user_goal": payload.user_goal,
+        "creative_tone": payload.creative_tone,
+        "effect_options": effect_options_for_prompt(payload.creative_tone),
     }
+
+    context["asset_analysis"] = analyze_asset(
+        asset.original_url,
+        asset.duration_seconds,
+        str(request.base_url),
+    )
 
     try:
         plans = BailianProvider().generate_edit_plans(context)
@@ -50,7 +60,7 @@ def generate(project_id: str, payload: GenerateRequest, request: Request, db: Se
     preview_url = storage.public_url_for_path(asset.original_url, str(request.base_url))
     edit_plans: list[EditPlan] = []
     for index, plan in enumerate(plans[: payload.version_count]):
-        _prepare_plan_variant(plan, index, asset.duration_seconds)
+        _prepare_plan_variant(plan, index, asset.duration_seconds, payload.creative_tone, context["asset_analysis"])
         try:
             render_path = storage.new_render_path()
             render_preview_clip(asset.original_url, render_path, plan, payload.aspect_ratio)
@@ -92,17 +102,35 @@ def list_edit_plans(project_id: str, db: Session = Depends(get_db)) -> list[Edit
     return list(db.scalars(select(EditPlan).where(EditPlan.project_id == project_id).order_by(EditPlan.created_at.desc())).all())
 
 
-def _prepare_plan_variant(plan: dict, index: int, source_duration: Optional[float]) -> None:
+def _prepare_plan_variant(
+    plan: dict,
+    index: int,
+    source_duration: Optional[float],
+    creative_tone: str,
+    asset_analysis: dict,
+) -> None:
     plan["variant_index"] = index
     plan["style_variant"] = ["痛点开场版", "效率节奏版", "产品卖点版"][index % 3]
-    plan.setdefault("visual_style", ["vivid_pain_point", "fast_impact", "clean_product"][index % 3])
-    plan.setdefault("effect_style", ["vignette_focus", "rhythm_flash", "soft_glow"][index % 3])
+    options = effect_options_for_prompt(creative_tone)
+    visual_styles = options.get("visual_styles") or ["vivid_pain_point", "fast_impact", "clean_product"]
+    effect_styles = options.get("effect_styles") or ["vignette_focus", "rhythm_flash", "soft_glow"]
+    bgm_styles = options.get("bgm_styles") or ["tech_pulse", "upbeat_drive", "warm_brand"]
+    if creative_tone != "auto":
+        plan["visual_style"] = visual_styles[index % len(visual_styles)]
+        plan["effect_style"] = effect_styles[index % len(effect_styles)]
+    else:
+        plan.setdefault("visual_style", visual_styles[index % len(visual_styles)])
+        plan.setdefault("effect_style", effect_styles[index % len(effect_styles)])
     bgm = plan.get("bgm")
     if not isinstance(bgm, dict):
         bgm = {}
         plan["bgm"] = bgm
-    bgm.setdefault("style", ["tech_pulse", "upbeat_drive", "warm_brand"][index % 3])
+    if creative_tone != "auto":
+        bgm["style"] = bgm_styles[index % len(bgm_styles)]
+    else:
+        bgm.setdefault("style", bgm_styles[index % len(bgm_styles)])
     bgm.setdefault("volume", 0.22)
+    plan.setdefault("analysis_summary", asset_analysis.get("summary", "AI 已完成素材理解并生成剪辑策略。"))
     if not isinstance(plan.get("caption_lines"), list):
         plan["caption_lines"] = [
             ["痛点放大", "AI 自动剪辑", "直接生成可发布版本"],

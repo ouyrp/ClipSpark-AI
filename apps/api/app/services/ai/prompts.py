@@ -12,9 +12,13 @@ def build_edit_plan_prompt(context: dict) -> str:
 4. 每个方案包含 hook、title、clips、subtitle_style、visual_style、effect_style、bgm、caption_lines、cover、publish_copy。
 5. 三个方案必须明显不同：不同剪辑片段、不同开头钩子、不同画面风格、不同节奏和不同音乐方向。
 6. clips 中 source_start/source_end 可以基于素材时长做合理估算，不能三个方案都取同一个时间段。
-7. visual_style 只能从 vivid_pain_point、fast_impact、clean_product 中选择。
-8. effect_style 只能从 vignette_focus、rhythm_flash、soft_glow 中选择。
-9. bgm.style 只能从 tech_pulse、upbeat_drive、warm_brand 中选择。
+7. 用户选择的效果基调：{context.get("creative_tone", "auto")}。
+8. 当前可用效果素材库：{json.dumps(context.get("effect_options", {}), ensure_ascii=False)}。
+9. visual_style 必须从素材库 visual_styles 中选择。
+10. effect_style 必须从素材库 effect_styles 中选择。
+11. bgm.style 必须从素材库 bgm_styles 中选择。
+12. 根据素材分析结果决定剪辑节奏、特效和字幕层，不要只套固定模板。
+13. 如果视觉分析提示喜庆、舞台、活动、婚礼、节日，可以优先使用 fireworks/sparkle 类效果。
 10. caption_lines 给 2 到 3 条适合叠加到视频里的短字幕。
 11. 如果素材缺少字幕，先按通用口播/产品介绍视频生成可执行剪辑策略。
 
@@ -58,7 +62,8 @@ def build_edit_plan_prompt(context: dict) -> str:
       "publish_copy": {{
         "caption": "发布文案",
         "hashtags": ["AI剪辑", "短视频"]
-      }}
+      }},
+      "analysis_summary": "为什么这样剪、画面和声音判断依据"
     }}
   ]
 }}

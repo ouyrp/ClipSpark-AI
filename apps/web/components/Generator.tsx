@@ -10,6 +10,7 @@ export function Generator() {
   const [projectName, setProjectName] = useState("我的第一条 AI 剪辑项目");
   const [targetPlatform, setTargetPlatform] = useState("douyin");
   const [aspectRatio, setAspectRatio] = useState("9:16");
+  const [creativeTone, setCreativeTone] = useState("auto");
   const [userGoal, setUserGoal] = useState("剪出 3 条可以直接发的短视频");
   const [file, setFile] = useState<File | null>(null);
   const [step, setStep] = useState<Step>("idle");
@@ -44,6 +45,7 @@ export function Generator() {
         aspectRatio,
         versionCount: 3,
         userGoal,
+        creativeTone,
       });
       setPlans(generatedPlans);
       setStep("done");
@@ -92,6 +94,18 @@ export function Generator() {
               <option value="9:16">9:16 竖屏</option>
               <option value="1:1">1:1 方形</option>
               <option value="16:9">16:9 横屏</option>
+            </select>
+          </label>
+
+          <label className="field">
+            <span className="label">效果基调</span>
+            <select className="select" value={creativeTone} onChange={(event) => setCreativeTone(event.target.value)}>
+              <option value="auto">AI 自动判断</option>
+              <option value="festival">喜庆烟花</option>
+              <option value="cinematic">电影风</option>
+              <option value="anime">动漫风</option>
+              <option value="high_energy">高能卡点</option>
+              <option value="clean_product">干净产品风</option>
             </select>
           </label>
 
@@ -152,6 +166,7 @@ export function Generator() {
                   {String(item.plan.bgm?.style ?? "-")}
                 </p>
               )}
+              {item.plan.analysis_summary && <p className="muted">素材理解：{String(item.plan.analysis_summary)}</p>}
               <p className="muted">{String(item.plan.publish_copy?.caption ?? "")}</p>
             </article>
           ))}
