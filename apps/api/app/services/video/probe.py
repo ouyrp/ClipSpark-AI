@@ -1,6 +1,7 @@
 import json
 import subprocess
 from pathlib import Path
+from typing import Optional
 
 
 def probe_video(path: str) -> dict:
@@ -34,7 +35,7 @@ def probe_video(path: str) -> dict:
     }
 
 
-def _parse_fps(value: str | None) -> float | None:
+def _parse_fps(value: Optional[str]) -> Optional[float]:
     if not value or "/" not in value:
         return None
     numerator, denominator = value.split("/", 1)

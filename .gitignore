@@ -11,6 +11,9 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
+*.db
+*.sqlite
+*.sqlite3
 storage/uploads/*
 storage/processed/*
 storage/renders/*

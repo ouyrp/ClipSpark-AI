@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -8,7 +9,7 @@ class GenerateRequest(BaseModel):
     target_platform: str = "douyin"
     aspect_ratio: str = "9:16"
     version_count: int = 3
-    user_goal: str | None = None
+    user_goal: Optional[str] = None
 
 
 class EditPlanRead(BaseModel):
@@ -17,7 +18,7 @@ class EditPlanRead(BaseModel):
     asset_id: str
     target_platform: str
     aspect_ratio: str
-    duration_seconds: float | None
+    duration_seconds: Optional[float]
     plan: dict
     status: str
     created_at: datetime

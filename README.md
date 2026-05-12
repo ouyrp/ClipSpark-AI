@@ -23,7 +23,7 @@ storage     本地开发存储目录
 cd apps/api
 python -m venv .venv
 source .venv/bin/activate
-pip install -e .
+pip install .
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
