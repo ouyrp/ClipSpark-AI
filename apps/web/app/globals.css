@@ -1,0 +1,158 @@
+:root {
+  --bg: #f7f8fb;
+  --panel: #ffffff;
+  --ink: #151922;
+  --muted: #697386;
+  --line: #dfe4ec;
+  --brand: #1677ff;
+  --brand-strong: #0958d9;
+  --ok: #168a4a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  height: 58px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.main {
+  width: min(1180px, calc(100% - 40px));
+  margin: 28px auto;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.panel h2 {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 11px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.button {
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 14px;
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.button:hover {
+  background: var(--brand-strong);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.stack {
+  display: grid;
+  gap: 14px;
+}
+
+.result {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fff;
+}
+
+.result h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #bfd8ff;
+  color: #0958d9;
+  background: #eef6ff;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  margin-right: 6px;
+}
+
+.status {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+}
