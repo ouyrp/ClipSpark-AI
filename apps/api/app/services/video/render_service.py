@@ -9,6 +9,7 @@ FONT_FILE = "/System/Library/Fonts/STHeiti Medium.ttc"
 
 
 def render_preview_clip(source_path: str, output_path: str, plan: dict, aspect_ratio: str) -> None:
+    variant = int(plan.get("variant_index") or 0) % 3
     clip = _first_clip(plan)
     start = _safe_float(clip.get("source_start"), 0)
     requested_end = _safe_float(clip.get("source_end"), start + 35)
@@ -18,6 +19,8 @@ def render_preview_clip(source_path: str, output_path: str, plan: dict, aspect_r
     width, height = _target_size(aspect_ratio)
     fade_out_start = max(duration - 0.45, 0)
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    style = _style_for_plan(plan, variant)
+    caption = _caption_text(plan, style)
 
     video_filter = ",".join(
         [
@@ -25,15 +28,17 @@ def render_preview_clip(source_path: str, output_path: str, plan: dict, aspect_r
             "setpts=PTS-STARTPTS",
             f"scale={width}:{height}:force_original_aspect_ratio=increase",
             f"crop={width}:{height}",
-            "eq=contrast=1.08:saturation=1.18:brightness=0.015",
+            style["eq"],
             "unsharp=5:5:0.6:3:3:0.2",
+            style["effect"],
             "fade=t=in:st=0:d=0.35",
             f"fade=t=out:st={fade_out_start}:d=0.4",
             "drawbox=x=0:y=0:w=iw:h=270:color=black@0.46:t=fill",
+            style["accent"],
             _drawtext(title, 48, 56, 54),
             _drawtext(hook, 48, 142, 38),
             "drawbox=x=0:y=ih-180:w=iw:h=180:color=black@0.28:t=fill",
-            _drawtext("AI 自动剪辑 · 已添加标题、调色、淡入淡出、背景音", 48, "h-118", 34),
+            _drawtext(caption, 48, "h-118", 34),
         ]
     )
 
@@ -47,12 +52,19 @@ def render_preview_clip(source_path: str, output_path: str, plan: dict, aspect_r
         "-t",
         str(duration),
         "-i",
-        "sine=frequency=220:sample_rate=44100",
+        f"sine=frequency={style['bass']}:sample_rate=44100",
+        "-f",
+        "lavfi",
+        "-t",
+        str(duration),
+        "-i",
+        f"sine=frequency={style['lead']}:sample_rate=44100",
         "-filter_complex",
         f"[0:v]{video_filter}[v];"
         f"[0:a]atrim=start={start}:duration={duration},asetpts=PTS-STARTPTS,volume=0.82[a0];"
-        "[1:a]volume=0.045[a1];"
-        "[a0][a1]amix=inputs=2:duration=shortest:dropout_transition=0,"
+        f"[1:a]volume={style['bass_volume']},tremolo=f={style['pulse']}:d=0.35[a1];"
+        f"[2:a]volume={style['lead_volume']},tremolo=f={style['pulse'] + 2}:d=0.45,aecho=0.8:0.65:80:0.25[a2];"
+        "[a0][a1][a2]amix=inputs=3:duration=shortest:dropout_transition=0,"
         "afade=t=in:st=0:d=0.35,"
         f"afade=t=out:st={fade_out_start}:d=0.4[a]",
         "-map",
@@ -77,7 +89,7 @@ def render_preview_clip(source_path: str, output_path: str, plan: dict, aspect_r
     try:
         _run(command)
     except RuntimeError:
-        _render_without_source_audio(ffmpeg, source_path, output_path, video_filter, duration, fade_out_start)
+        _render_without_source_audio(ffmpeg, source_path, output_path, video_filter, duration, fade_out_start, style)
 
 
 def _render_without_source_audio(
@@ -87,6 +99,7 @@ def _render_without_source_audio(
     video_filter: str,
     duration: float,
     fade_out_start: float,
+    style: dict,
 ) -> None:
     command = [
         ffmpeg,
@@ -98,10 +111,18 @@ def _render_without_source_audio(
         "-t",
         str(duration),
         "-i",
-        "sine=frequency=220:sample_rate=44100",
+        f"sine=frequency={style['bass']}:sample_rate=44100",
+        "-f",
+        "lavfi",
+        "-t",
+        str(duration),
+        "-i",
+        f"sine=frequency={style['lead']}:sample_rate=44100",
         "-filter_complex",
         f"[0:v]{video_filter}[v];"
-        "[1:a]volume=0.055,"
+        f"[1:a]volume={style['bass_volume']},tremolo=f={style['pulse']}:d=0.35[a1];"
+        f"[2:a]volume={style['lead_volume']},tremolo=f={style['pulse'] + 2}:d=0.45,aecho=0.8:0.65:80:0.25[a2];"
+        "[a1][a2]amix=inputs=2:duration=shortest:dropout_transition=0,"
         "afade=t=in:st=0:d=0.35,"
         f"afade=t=out:st={fade_out_start}:d=0.4[a]",
         "-map",
@@ -156,6 +177,70 @@ def _target_size(aspect_ratio: str) -> tuple[int, int]:
     if aspect_ratio == "1:1":
         return 1080, 1080
     return 1080, 1920
+
+
+def _style_for_plan(plan: dict, variant: int) -> dict:
+    styles = [
+        {
+            "label": "痛点开场版",
+            "visual_style": "vivid_pain_point",
+            "effect_style": "vignette_focus",
+            "bgm_style": "tech_pulse",
+            "eq": "eq=contrast=1.12:saturation=1.22:brightness=0.01",
+            "effect": "vignette=angle=PI/5:mode=backward",
+            "accent": "drawbox=x=0:y=0:w=18:h=ih:color=0x1677ff@0.9:t=fill",
+            "bass": 196,
+            "lead": 392,
+            "pulse": 4,
+            "bass_volume": 0.07,
+            "lead_volume": 0.035,
+        },
+        {
+            "label": "效率节奏版",
+            "visual_style": "fast_impact",
+            "effect_style": "rhythm_flash",
+            "bgm_style": "upbeat_drive",
+            "eq": "eq=contrast=1.18:saturation=1.35:brightness=0.025",
+            "effect": "tblend=all_mode=lighten:all_opacity=0.10",
+            "accent": "drawbox=x=0:y=0:w=iw:h=14:color=0x16a34a@0.9:t=fill",
+            "bass": 247,
+            "lead": 494,
+            "pulse": 7,
+            "bass_volume": 0.075,
+            "lead_volume": 0.04,
+        },
+        {
+            "label": "产品卖点版",
+            "visual_style": "clean_product",
+            "effect_style": "soft_glow",
+            "bgm_style": "warm_brand",
+            "eq": "eq=contrast=1.05:saturation=1.12:brightness=0.04",
+            "effect": "gblur=sigma=0.22",
+            "accent": "drawbox=x=iw-18:y=0:w=18:h=ih:color=0xf59e0b@0.9:t=fill",
+            "bass": 220,
+            "lead": 330,
+            "pulse": 5,
+            "bass_volume": 0.065,
+            "lead_volume": 0.045,
+        },
+    ]
+    visual_style = str(plan.get("visual_style") or "")
+    effect_style = str(plan.get("effect_style") or "")
+    bgm = plan.get("bgm") if isinstance(plan.get("bgm"), dict) else {}
+    bgm_style = str(bgm.get("style") or "")
+    for style in styles:
+        if visual_style == style["visual_style"] or effect_style == style["effect_style"] or bgm_style == style["bgm_style"]:
+            return style
+    return styles[variant % len(styles)]
+
+
+def _caption_text(plan: dict, style: dict) -> str:
+    lines = plan.get("caption_lines")
+    if isinstance(lines, list) and lines:
+        clean_lines = [str(line).strip() for line in lines if str(line).strip()]
+        if clean_lines:
+            return " · ".join(clean_lines[:3])
+    return f"{style['label']} · AI 已动态选择调色、特效、背景音乐"
 
 
 def _drawtext(text: str, x: object, y: object, size: int) -> str:

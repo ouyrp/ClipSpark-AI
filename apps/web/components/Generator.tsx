@@ -147,7 +147,10 @@ export function Generator() {
                 <span className="pill">{item.plan.preview_type === "rendered_clip" ? "已渲染预览" : item.status}</span>
               </p>
               {Array.isArray(item.plan.render_features) && (
-                <p className="muted">处理：裁剪、比例适配、标题叠加、调色、淡入淡出、自动背景音</p>
+                <p className="muted">
+                  AI 风格：{String(item.plan.visual_style ?? "-")} / {String(item.plan.effect_style ?? "-")} /{" "}
+                  {String(item.plan.bgm?.style ?? "-")}
+                </p>
               )}
               <p className="muted">{String(item.plan.publish_copy?.caption ?? "")}</p>
             </article>
@@ -171,6 +174,9 @@ function stepLabel(step: Step) {
 }
 
 function buildPreviewUrl(plan: Record<string, any>) {
+  if (plan.preview_type === "rendered_clip") {
+    return String(plan.preview_url);
+  }
   const clips = Array.isArray(plan.clips) ? plan.clips : [];
   const firstClip = clips[0];
   const start = Number(firstClip?.source_start ?? 0);
