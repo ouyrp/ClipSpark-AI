@@ -12,7 +12,9 @@ class LocalStorage:
     def __init__(self) -> None:
         self.root = get_settings().storage_root_path
         self.uploads = self.root / "uploads"
+        self.renders = self.root / "renders"
         self.uploads.mkdir(parents=True, exist_ok=True)
+        self.renders.mkdir(parents=True, exist_ok=True)
 
     def save_upload(self, file: UploadFile) -> tuple[str, str]:
         suffix = Path(file.filename or "").suffix
@@ -25,3 +27,6 @@ class LocalStorage:
     def public_url_for_path(self, path: str, base_url: str) -> str:
         relative = Path(path).resolve().relative_to(self.root)
         return f"{base_url.rstrip('/')}/media/{quote(relative.as_posix())}"
+
+    def new_render_path(self) -> str:
+        return str(self.renders / f"{uuid.uuid4()}.mp4")

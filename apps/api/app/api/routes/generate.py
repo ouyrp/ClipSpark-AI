@@ -10,6 +10,7 @@ from app.schemas.generate import EditPlanRead, GenerateRequest
 from app.services.ai.bailian_provider import BailianProvider
 from app.services.ai.fallback import fallback_edit_plans
 from app.services.storage.local_storage import LocalStorage
+from app.services.video.render_service import render_preview_clip
 
 router = APIRouter(prefix="/projects/{project_id}/generate", tags=["generate"])
 
@@ -47,8 +48,16 @@ def generate(project_id: str, payload: GenerateRequest, request: Request, db: Se
     preview_url = storage.public_url_for_path(asset.original_url, str(request.base_url))
     edit_plans: list[EditPlan] = []
     for plan in plans[: payload.version_count]:
-        plan["preview_url"] = preview_url
-        plan["preview_type"] = "source_clip"
+        try:
+            render_path = storage.new_render_path()
+            render_preview_clip(asset.original_url, render_path, plan, payload.aspect_ratio)
+            plan["preview_url"] = storage.public_url_for_path(render_path, str(request.base_url))
+            plan["preview_type"] = "rendered_clip"
+            plan["render_features"] = ["trim", "resize", "title_overlay", "color_grade", "fade", "auto_bgm"]
+        except Exception as exc:
+            plan["preview_url"] = preview_url
+            plan["preview_type"] = "source_clip"
+            plan["render_error"] = str(exc)
         edit_plan = EditPlan(
             project_id=project_id,
             asset_id=asset.id,

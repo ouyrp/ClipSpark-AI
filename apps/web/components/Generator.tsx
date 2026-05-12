@@ -144,8 +144,11 @@ export function Generator() {
               <p>
                 <span className="pill">{item.target_platform}</span>
                 <span className="pill">{item.aspect_ratio}</span>
-                <span className="pill">{item.status}</span>
+                <span className="pill">{item.plan.preview_type === "rendered_clip" ? "已渲染预览" : item.status}</span>
               </p>
+              {Array.isArray(item.plan.render_features) && (
+                <p className="muted">处理：裁剪、比例适配、标题叠加、调色、淡入淡出、自动背景音</p>
+              )}
               <p className="muted">{String(item.plan.publish_copy?.caption ?? "")}</p>
             </article>
           ))}

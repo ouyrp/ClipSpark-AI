@@ -13,7 +13,8 @@ dependencies = [
   "openai>=1.40.0",
   "python-dotenv>=1.0.1",
   "celery>=5.4.0",
-  "redis>=5.0.0"
+  "redis>=5.0.0",
+  "imageio-ffmpeg>=0.5.1"
 ]
 
 [tool.setuptools.packages.find]
