@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     def storage_root_path(self) -> Path:
         root = Path(self.local_storage_root)
         if not root.is_absolute():
-            root = Path(__file__).resolve().parents[4] / root
+            root = Path.cwd() / root
         return root.resolve()
 
 

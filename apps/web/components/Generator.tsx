@@ -128,6 +128,16 @@ export function Generator() {
 
           {plans.map((item, index) => (
             <article className="result" key={item.id}>
+              {typeof item.plan.preview_url === "string" && (
+                <div className="previewFrame">
+                  <video
+                    className="previewVideo"
+                    controls
+                    preload="metadata"
+                    src={buildPreviewUrl(item.plan)}
+                  />
+                </div>
+              )}
               <h3>方案 {index + 1}：{String(item.plan.title ?? "未命名方案")}</h3>
               <p>{String(item.plan.hook ?? "暂无钩子文案")}</p>
               <p className="muted">时长：{item.duration_seconds ?? item.plan.duration ?? "-"} 秒</p>
@@ -155,4 +165,13 @@ function stepLabel(step: Step) {
     error: "失败",
   };
   return labels[step];
+}
+
+function buildPreviewUrl(plan: Record<string, any>) {
+  const clips = Array.isArray(plan.clips) ? plan.clips : [];
+  const firstClip = clips[0];
+  const start = Number(firstClip?.source_start ?? 0);
+  const end = Number(firstClip?.source_end ?? 0);
+  const fragment = Number.isFinite(end) && end > start ? `#t=${start},${end}` : `#t=${start}`;
+  return `${plan.preview_url}${fragment}`;
 }

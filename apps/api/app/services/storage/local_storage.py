@@ -1,6 +1,7 @@
 import shutil
 import uuid
 from pathlib import Path
+from urllib.parse import quote
 
 from fastapi import UploadFile
 
@@ -20,3 +21,7 @@ class LocalStorage:
         with target.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         return file.filename or safe_name, str(target)
+
+    def public_url_for_path(self, path: str, base_url: str) -> str:
+        relative = Path(path).resolve().relative_to(self.root)
+        return f"{base_url.rstrip('/')}/media/{quote(relative.as_posix())}"
