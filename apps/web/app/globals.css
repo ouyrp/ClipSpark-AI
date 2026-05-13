@@ -1,17 +1,18 @@
 :root {
-  --bg: #050505;
-  --surface: #0b0d10;
-  --panel: #111419;
-  --card: #171b22;
-  --card-soft: #202631;
-  --ink: #f7f8fb;
-  --muted: #a7afbd;
-  --line: #2a303a;
-  --line-bright: #3a4352;
-  --brand: #10e4c4;
-  --brand-strong: #08bfa5;
-  --accent: #ff5c4d;
-  --ok: #51e7a5;
+  --bg: #eaf6ff;
+  --surface: #f7fbff;
+  --panel: #ffffff;
+  --card: #ffffff;
+  --card-soft: #eef7ff;
+  --ink: #112136;
+  --muted: #62738b;
+  --line: #d4e5f5;
+  --line-bright: #b8d7f2;
+  --brand: #1f8fff;
+  --brand-strong: #0b72dc;
+  --accent: #43c6e8;
+  --ok: #14a36f;
+  --shadow: 0 18px 58px rgba(39, 115, 184, 0.15);
 }
 
 * {
@@ -35,14 +36,14 @@ textarea {
 .shell {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 18% 0%, rgba(16, 228, 196, 0.14), transparent 28%),
-    linear-gradient(180deg, #030303 0%, #08090b 38%, #10131a 100%);
+    linear-gradient(135deg, rgba(191, 229, 255, 0.88) 0%, rgba(236, 248, 255, 0.92) 45%, rgba(247, 252, 255, 0.96) 100%),
+    var(--bg);
 }
 
 .topbar {
   height: 66px;
-  background: #020202;
-  border-bottom: 1px solid #151515;
+  background: rgba(247, 252, 255, 0.94);
+  border-bottom: 1px solid rgba(184, 215, 242, 0.85);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -50,6 +51,7 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 10;
+  backdrop-filter: blur(16px);
 }
 
 .brand {
@@ -62,12 +64,12 @@ textarea {
   display: flex;
   align-items: center;
   gap: 38px;
-  color: #f5f5f5;
+  color: var(--ink);
   font-weight: 700;
 }
 
 .navItem {
-  color: #d8dce3;
+  color: #526985;
 }
 
 .navItem.active {
@@ -77,16 +79,16 @@ textarea {
 .loginButton {
   border: 0;
   border-radius: 4px;
-  background: #333842;
-  color: #fff;
+  background: #dcefff;
+  color: var(--brand-strong);
   padding: 9px 16px;
   font-weight: 700;
 }
 
 .subnav {
   height: 48px;
-  background: #fff;
-  color: #222;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--ink);
   display: flex;
   align-items: center;
   gap: 38px;
@@ -98,12 +100,12 @@ textarea {
   height: 100%;
   display: inline-flex;
   align-items: center;
-  color: #6b7280;
+  color: #657991;
 }
 
 .subnavItem.active {
-  color: #111;
-  border-bottom: 3px solid #111;
+  color: var(--brand-strong);
+  border-bottom: 3px solid var(--brand);
 }
 
 .main {
@@ -159,17 +161,19 @@ textarea {
   height: 32px;
   padding: 0 15px;
   border-radius: 999px;
-  color: #111;
-  background: #fff;
+  color: #0d5eb0;
+  background: #dff0ff;
+  border: 1px solid #bdddf8;
   font-weight: 700;
   font-size: 14px;
 }
 
 .panel {
-  background: rgba(17, 20, 25, 0.92);
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--line);
   border-radius: 8px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
 }
 
 .generatorPanel {
@@ -198,9 +202,10 @@ textarea {
 .panelTitle strong {
   color: var(--brand);
   font-size: 13px;
-  border: 1px solid rgba(16, 228, 196, 0.35);
+  border: 1px solid rgba(31, 143, 255, 0.28);
   border-radius: 999px;
   padding: 4px 10px;
+  background: #edf7ff;
 }
 
 .field {
@@ -222,7 +227,7 @@ textarea {
   border: 1px solid var(--line-bright);
   border-radius: 6px;
   padding: 11px 12px;
-  background: #0b0e13;
+  background: #f8fcff;
   color: var(--ink);
   outline: none;
 }
@@ -231,7 +236,7 @@ textarea {
 .select:focus,
 .textarea:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(16, 228, 196, 0.12);
+  box-shadow: 0 0 0 3px rgba(31, 143, 255, 0.13);
 }
 
 .textarea {
@@ -244,9 +249,10 @@ textarea {
   border-radius: 6px;
   padding: 11px 16px;
   background: var(--brand);
-  color: #06110f;
+  color: #fff;
   cursor: pointer;
   font-weight: 800;
+  box-shadow: 0 10px 22px rgba(31, 143, 255, 0.2);
 }
 
 .button:hover {
@@ -284,6 +290,7 @@ textarea {
   padding: 14px;
   background: var(--card);
   overflow: hidden;
+  box-shadow: 0 12px 34px rgba(79, 148, 207, 0.1);
 }
 
 .result:first-child {
@@ -304,8 +311,8 @@ textarea {
   aspect-ratio: 9 / 16;
   overflow: hidden;
   border-radius: 6px;
-  background: #05070b;
-  border: 1px solid #303846;
+  background: #e8f4ff;
+  border: 1px solid #c6def3;
 }
 
 .coverImage,
@@ -327,7 +334,7 @@ textarea {
   bottom: 8px;
   padding: 4px 7px;
   border-radius: 3px;
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(14, 75, 130, 0.82);
   color: #fff;
   font-size: 12px;
   font-weight: 800;
@@ -351,9 +358,9 @@ textarea {
 .pill {
   display: inline-flex;
   align-items: center;
-  border: 1px solid rgba(16, 228, 196, 0.35);
+  border: 1px solid rgba(31, 143, 255, 0.28);
   color: var(--brand);
-  background: rgba(16, 228, 196, 0.09);
+  background: rgba(31, 143, 255, 0.09);
   border-radius: 999px;
   padding: 5px 9px;
   font-size: 12px;
