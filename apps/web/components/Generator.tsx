@@ -20,6 +20,7 @@ export function Generator() {
   const [targetPlatform, setTargetPlatform] = useState("douyin");
   const [aspectRatio, setAspectRatio] = useState("9:16");
   const [creativeTone, setCreativeTone] = useState("auto");
+  const [aiProvider, setAiProvider] = useState("gemini");
   const [userGoal, setUserGoal] = useState("剪出 3 条可以直接发的短视频");
   const [file, setFile] = useState<File | null>(null);
   const [step, setStep] = useState<Step>("idle");
@@ -57,6 +58,7 @@ export function Generator() {
         versionCount: 3,
         userGoal,
         creativeTone,
+        aiProvider,
       });
       setPlans(generatedPlans);
       setStep("done");
@@ -165,6 +167,16 @@ export function Generator() {
               <option value="anime">动漫风</option>
               <option value="high_energy">高能卡点</option>
               <option value="clean_product">干净产品风</option>
+            </select>
+          </label>
+
+          <label className="field">
+            <span className="label">AI 模型</span>
+            <select className="select" value={aiProvider} onChange={(event) => setAiProvider(event.target.value)}>
+              <option value="gemini">Gemini Flash 免费层（推荐视频理解）</option>
+              <option value="openrouter_free">OpenRouter 免费路由（备选）</option>
+              <option value="ollama">本地 Ollama 多模态（无云端费用）</option>
+              <option value="bailian">百炼普通 API（非 Coding Plan）</option>
             </select>
           </label>
 

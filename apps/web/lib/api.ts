@@ -65,6 +65,7 @@ export function generatePlans(input: {
   versionCount: number;
   userGoal?: string;
   creativeTone: string;
+  aiProvider?: string;
 }) {
   return request<EditPlan[]>(`/projects/${input.projectId}/generate`, {
     method: "POST",
@@ -75,6 +76,7 @@ export function generatePlans(input: {
       version_count: input.versionCount,
       user_goal: input.userGoal,
       creative_tone: input.creativeTone,
+      ai_provider: input.aiProvider,
     }),
   });
 }

@@ -9,6 +9,23 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./clipspark.db"
     redis_url: str = "redis://localhost:6379/0"
 
+    ai_provider: str = "gemini"
+
+    gemini_api_key: str = ""
+    gemini_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
+    gemini_text_model: str = "gemini-2.5-flash-lite"
+    gemini_vision_model: str = "gemini-2.5-flash"
+
+    openrouter_api_key: str = ""
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    openrouter_text_model: str = "openrouter/free"
+    openrouter_vision_model: str = "openrouter/free"
+
+    ollama_api_key: str = "ollama"
+    ollama_base_url: str = "http://localhost:11434/v1"
+    ollama_text_model: str = "qwen2.5:7b"
+    ollama_vision_model: str = "qwen2.5vl:7b"
+
     dashscope_api_key: str = ""
     bailian_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     bailian_text_model: str = "qwen-plus"

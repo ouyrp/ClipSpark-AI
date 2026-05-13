@@ -11,6 +11,7 @@ class GenerateRequest(BaseModel):
     version_count: int = 3
     user_goal: Optional[str] = None
     creative_tone: str = "auto"
+    ai_provider: Optional[str] = None
 
 
 class EditPlanRead(BaseModel):

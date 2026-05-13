@@ -1,8 +1,5 @@
-import base64
-import json
 import subprocess
 import uuid
-from pathlib import Path
 from typing import Optional
 
 import imageio_ffmpeg
@@ -11,14 +8,20 @@ from app.core.config import get_settings
 from app.services.storage.local_storage import LocalStorage
 
 
-def analyze_asset(source_path: str, duration_seconds: Optional[float], public_base_url: str) -> dict:
-    from app.services.ai.bailian_provider import BailianProvider
+def analyze_asset(
+    source_path: str,
+    duration_seconds: Optional[float],
+    public_base_url: str,
+    ai_provider: Optional[str] = None,
+) -> dict:
+    from app.services.ai.free_provider import build_free_provider
 
     storage = LocalStorage()
     audio_path = _extract_audio(source_path, storage)
     frames = _extract_keyframes(source_path, storage, duration_seconds)
     try:
-        vision = BailianProvider().analyze_frames(frames) if frames else {"summary": "未抽取到关键帧", "scenes": []}
+        provider = build_free_provider(ai_provider)
+        vision = provider.analyze_frames(frames) if frames else {"summary": "未抽取到关键帧", "scenes": []}
     except Exception as exc:
         message = _describe_ai_error(exc)
         vision = {
@@ -131,17 +134,8 @@ def _describe_ai_error(exc: Exception) -> str:
         return "视觉模型名称或权限不可用"
     if "timeout" in error_text or "timed out" in error_text:
         return "视觉模型请求超时"
+    if not settings.gemini_api_key and settings.ai_provider == "gemini":
+        return "未配置 Gemini API Key"
+    if not settings.openrouter_api_key and settings.ai_provider == "openrouter_free":
+        return "未配置 OpenRouter API Key"
     return "视觉模型暂时不可用"
-
-
-def image_to_data_url(path: str) -> str:
-    data = Path(path).read_bytes()
-    encoded = base64.b64encode(data).decode("ascii")
-    return f"data:image/jpeg;base64,{encoded}"
-
-
-def parse_json_object(text: str) -> dict:
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        return {"summary": text[:500], "scenes": []}

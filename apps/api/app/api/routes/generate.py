@@ -9,8 +9,8 @@ from app.models.asset import Asset
 from app.models.edit_plan import EditPlan
 from app.models.project import Project
 from app.schemas.generate import EditPlanRead, GenerateRequest
-from app.services.ai.bailian_provider import BailianProvider
 from app.services.ai.fallback import fallback_edit_plans
+from app.services.ai.free_provider import build_free_provider
 from app.services.effects.library import effect_options_for_prompt
 from app.services.intelligence.strategy import build_intelligence_context
 from app.services.storage.local_storage import LocalStorage
@@ -43,6 +43,7 @@ def generate(project_id: str, payload: GenerateRequest, request: Request, db: Se
         "version_count": payload.version_count,
         "user_goal": payload.user_goal,
         "creative_tone": payload.creative_tone,
+        "ai_provider": payload.ai_provider,
         "effect_options": effect_options_for_prompt(payload.creative_tone),
     }
 
@@ -50,11 +51,12 @@ def generate(project_id: str, payload: GenerateRequest, request: Request, db: Se
         asset.original_url,
         asset.duration_seconds,
         str(request.base_url),
+        payload.ai_provider,
     )
     context["strategy_intelligence"] = build_intelligence_context(context, db)
 
     try:
-        plans = BailianProvider().generate_edit_plans(context)
+        plans = build_free_provider(payload.ai_provider).generate_edit_plans(context)
     except Exception as exc:
         plans = fallback_edit_plans({**context, "ai_error": str(exc)})
 

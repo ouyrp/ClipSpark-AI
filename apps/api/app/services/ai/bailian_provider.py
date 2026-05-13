@@ -4,7 +4,7 @@ from openai import OpenAI
 
 from app.core.config import get_settings
 from app.services.ai.prompts import build_edit_plan_prompt
-from app.services.video.analysis import image_to_data_url, parse_json_object
+from app.services.ai.utils import image_to_data_url, parse_json_object
 
 
 class BailianProvider:
