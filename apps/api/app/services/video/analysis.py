@@ -20,8 +20,9 @@ def analyze_asset(source_path: str, duration_seconds: Optional[float], public_ba
     try:
         vision = BailianProvider().analyze_frames(frames) if frames else {"summary": "未抽取到关键帧", "scenes": []}
     except Exception as exc:
+        message = _describe_ai_error(exc)
         vision = {
-            "summary": "已抽取关键帧，但视觉模型暂时不可用，使用本地素材信息生成剪辑。",
+            "summary": f"已抽取关键帧，但{message}，使用本地素材信息生成剪辑。",
             "scenes": [],
             "error": str(exc),
         }
@@ -117,6 +118,17 @@ def _build_summary(asr: dict, vision: dict) -> str:
     if not parts:
         return "已完成音频提取和关键帧抽取，等待更完整的 ASR 结果。"
     return "；".join(parts)
+
+
+def _describe_ai_error(exc: Exception) -> str:
+    error_text = str(exc).lower()
+    if "invalid_api_key" in error_text or "incorrect api key" in error_text or "401" in error_text:
+        return "百炼 API Key 认证失败"
+    if "model" in error_text and ("not" in error_text or "access" in error_text or "permission" in error_text):
+        return "视觉模型名称或权限不可用"
+    if "timeout" in error_text or "timed out" in error_text:
+        return "视觉模型请求超时"
+    return "视觉模型暂时不可用"
 
 
 def image_to_data_url(path: str) -> str:
