@@ -18,7 +18,7 @@ import {
 } from "../lib/api";
 
 type Step = "idle" | "creating" | "uploading" | "generating" | "done" | "error";
-type View = "create" | "templates" | "analysis" | "works" | "cover";
+type View = "create" | "templates" | "analysis" | "works" | "cover" | "viral" | "talking" | "sales";
 
 const templates = [
   {
@@ -67,6 +67,54 @@ const templates = [
     tags: ["产品", "种草", "清爽"],
   },
 ];
+
+const workflowModules = {
+  viral: {
+    eyebrow: "viral cutter",
+    title: "爆款拆条",
+    description: "把长视频拆成多个高开场、高冲突、高完播潜力的短片方向，适合访谈、直播、课程和活动素材。",
+    projectName: "爆款拆条项目",
+    tone: "high_energy",
+    platform: "douyin",
+    ratio: "9:16",
+    goal: "从长视频里拆出 3 条爆款潜力短片：前三秒强钩子、冲突或结果前置、节奏快、字幕关键词突出。",
+    cards: [
+      ["痛点前置", "先把用户最关心的问题放在 0-3 秒，制造继续看的理由。"],
+      ["结果先给", "先展示结论、成果或反差，再回到过程片段。"],
+      ["高光连剪", "优先选择表情、动作、转折和信息密度高的片段。"],
+    ],
+  },
+  talking: {
+    eyebrow: "talking package",
+    title: "口播包装",
+    description: "面向口播、知识分享、课程讲解，把内容包装成标题清晰、字幕好读、节奏稳定的短片。",
+    projectName: "口播包装项目",
+    tone: "clean_product",
+    platform: "xiaohongshu",
+    ratio: "9:16",
+    goal: "把口播视频包装成清晰易懂的短片：保留核心观点，生成大标题、分段字幕、关键词高亮和温和 BGM。",
+    cards: [
+      ["观点标题", "自动提炼一句主标题，让观众一眼知道这条讲什么。"],
+      ["字幕分层", "短句字幕叠加关键词，让口播信息更容易扫读。"],
+      ["停顿优化", "减少无效等待，保留自然语气和重点停顿。"],
+    ],
+  },
+  sales: {
+    eyebrow: "commerce clip",
+    title: "带货短片",
+    description: "适合产品介绍、探店、种草和直播切片，强调卖点、场景、价格/行动引导和封面可读性。",
+    projectName: "带货短片项目",
+    tone: "clean_product",
+    platform: "xiaohongshu",
+    ratio: "9:16",
+    goal: "剪出 3 条带货短片：突出产品卖点、使用场景、信任背书和行动引导，封面标题要清楚可读。",
+    cards: [
+      ["卖点提纯", "从素材里提炼 1-2 个最容易转化的核心卖点。"],
+      ["场景证明", "优先选择展示使用过程、对比效果和真实反馈的画面。"],
+      ["转化结尾", "结尾补上收藏、咨询、下单或进店的轻量行动引导。"],
+    ],
+  },
+} as const;
 
 export function Generator() {
   const [view, setView] = useState<View>("create");
@@ -249,6 +297,16 @@ export function Generator() {
     setView("create");
   }
 
+  function applyWorkflow(kind: keyof typeof workflowModules) {
+    const workflow = workflowModules[kind];
+    setProjectName(workflow.projectName);
+    setCreativeTone(workflow.tone);
+    setTargetPlatform(workflow.platform);
+    setAspectRatio(workflow.ratio);
+    setUserGoal(workflow.goal);
+    setView("create");
+  }
+
   function updateLocalPlan(id: string, updater: (plan: Record<string, any>) => Record<string, any>) {
     setPlans((current) => current.map((item) => (item.id === id ? { ...item, plan: updater({ ...item.plan }) } : item)));
     setLibraryPlans((current) => current.map((item) => (item.id === id ? { ...item, plan: updater({ ...item.plan }) } : item)));
@@ -267,7 +325,7 @@ export function Generator() {
       <header className="topbar">
         <div className="brand">ClipSpark AI</div>
         <nav className="nav">
-          <button className={navClass(view === "create")} onClick={() => setView("create")}>AI 创作</button>
+          <button className={navClass(["create", "viral", "talking", "sales", "cover"].includes(view))} onClick={() => setView("create")}>AI 创作</button>
           <button className={navClass(view === "templates")} onClick={() => setView("templates")}>模板库</button>
           <button className={navClass(view === "analysis")} onClick={() => setView("analysis")}>素材分析</button>
           <button className={navClass(view === "works")} onClick={() => setView("works")}>作品</button>
@@ -276,9 +334,9 @@ export function Generator() {
       </header>
       <div className="subnav">
         <button className={subnavClass(view === "create")} onClick={() => setView("create")}>一键成片</button>
-        <button className={subnavClass(view === "templates")} onClick={() => setView("templates")}>爆款拆条</button>
-        <button className={subnavClass(view === "templates")} onClick={() => setView("templates")}>口播包装</button>
-        <button className={subnavClass(view === "templates")} onClick={() => setView("templates")}>带货短片</button>
+        <button className={subnavClass(view === "viral")} onClick={() => setView("viral")}>爆款拆条</button>
+        <button className={subnavClass(view === "talking")} onClick={() => setView("talking")}>口播包装</button>
+        <button className={subnavClass(view === "sales")} onClick={() => setView("sales")}>带货短片</button>
         <button className={subnavClass(view === "cover")} onClick={() => setView("cover")}>封面生成</button>
       </div>
 
@@ -287,6 +345,9 @@ export function Generator() {
       {view === "analysis" && renderAnalysis()}
       {view === "works" && renderWorks()}
       {view === "cover" && renderCover()}
+      {view === "viral" && renderWorkflow("viral")}
+      {view === "talking" && renderWorkflow("talking")}
+      {view === "sales" && renderWorkflow("sales")}
     </>
   );
 
@@ -340,6 +401,53 @@ export function Generator() {
               <button className="button" type="button" onClick={() => applyTemplate(item)}>套用模板</button>
             </article>
           ))}
+        </section>
+      </main>
+    );
+  }
+
+  function renderWorkflow(kind: keyof typeof workflowModules) {
+    const workflow = workflowModules[kind];
+    return (
+      <main className="main">
+        <section className="intro">
+          <p className="eyebrow">{workflow.eyebrow}</p>
+          <h1>{workflow.title}</h1>
+          <p className="introText">{workflow.description}</p>
+          <div className="toneChips">{workflow.cards.map(([title]) => <span key={title}>{title}</span>)}</div>
+        </section>
+
+        <section className="panel generatorPanel">
+          <div className="panelTitle"><span>{workflow.title}设置</span><strong>已实现</strong></div>
+          <label className="field">
+            <span className="label">推荐平台</span>
+            <input className="input" value={platformLabel(workflow.platform)} readOnly />
+          </label>
+          <label className="field">
+            <span className="label">推荐比例</span>
+            <input className="input" value={workflow.ratio} readOnly />
+          </label>
+          <label className="field">
+            <span className="label">策略目标</span>
+            <textarea className="textarea" value={workflow.goal} readOnly />
+          </label>
+          <button className="button" type="button" onClick={() => applyWorkflow(kind)}>套用并去生成</button>
+        </section>
+
+        <section className="panel resultsPanel">
+          <div className="panelTitle"><span>剪辑策略</span><strong>3 步</strong></div>
+          <div className="templateGrid workflowGrid">
+            {workflow.cards.map(([title, body], index) => (
+              <article className="templateCard workflowCard" key={title}>
+                <div className={`workflowNumber n${index + 1}`}>{index + 1}</div>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </article>
+            ))}
+          </div>
+          <div className="workflowAction">
+            <button className="button compactButton" type="button" onClick={() => applyWorkflow(kind)}>使用这个流程</button>
+          </div>
         </section>
       </main>
     );
@@ -629,6 +737,17 @@ function navClass(active: boolean) {
 
 function subnavClass(active: boolean) {
   return active ? "subnavItem active" : "subnavItem";
+}
+
+function platformLabel(value: string) {
+  const labels: Record<string, string> = {
+    douyin: "抖音",
+    xiaohongshu: "小红书",
+    kuaishou: "快手",
+    tiktok: "TikTok",
+    youtube_shorts: "YouTube Shorts",
+  };
+  return labels[value] ?? value;
 }
 
 function normalizeCaptionLines(value: unknown) {

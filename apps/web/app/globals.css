@@ -453,6 +453,38 @@ button {
   background: linear-gradient(135deg, #eef8ff 0%, #ffffff 100%);
 }
 
+.workflowGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.workflowCard {
+  min-height: 190px;
+}
+
+.workflowNumber {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 900;
+  background: var(--brand);
+  box-shadow: 0 12px 24px rgba(31, 143, 255, 0.22);
+}
+
+.workflowNumber.n2 {
+  background: #32b6d8;
+}
+
+.workflowNumber.n3 {
+  background: #14a36f;
+}
+
+.workflowAction {
+  margin-top: 18px;
+}
+
 .analysisGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
