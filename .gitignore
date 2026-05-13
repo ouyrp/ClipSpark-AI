@@ -17,6 +17,8 @@ venv/
 storage/uploads/*
 storage/processed/*
 storage/renders/*
+storage/covers/*
 !storage/uploads/.gitkeep
 !storage/processed/.gitkeep
 !storage/renders/.gitkeep
+!storage/covers/.gitkeep

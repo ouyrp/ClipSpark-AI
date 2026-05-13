@@ -142,6 +142,11 @@ export function Generator() {
 
           {plans.map((item, index) => (
             <article className="result" key={item.id}>
+              {typeof item.plan.cover_url === "string" && (
+                <div className="coverFrame">
+                  <img className="coverImage" src={String(item.plan.cover_url)} alt={`方案 ${index + 1} 封面`} />
+                </div>
+              )}
               {typeof item.plan.preview_url === "string" && (
                 <div className="previewFrame">
                   <video

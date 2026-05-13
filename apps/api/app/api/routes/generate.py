@@ -15,7 +15,7 @@ from app.services.effects.library import effect_options_for_prompt
 from app.services.intelligence.strategy import build_intelligence_context
 from app.services.storage.local_storage import LocalStorage
 from app.services.video.analysis import analyze_asset
-from app.services.video.render_service import render_preview_clip
+from app.services.video.render_service import render_cover_image, render_preview_clip
 
 router = APIRouter(prefix="/projects/{project_id}/generate", tags=["generate"])
 
@@ -66,7 +66,10 @@ def generate(project_id: str, payload: GenerateRequest, request: Request, db: Se
         try:
             render_path = storage.new_render_path()
             render_preview_clip(asset.original_url, render_path, plan, payload.aspect_ratio)
+            cover_path = storage.new_cover_path()
+            render_cover_image(render_path, cover_path, plan, payload.aspect_ratio)
             plan["preview_url"] = storage.public_url_for_path(render_path, str(request.base_url))
+            plan["cover_url"] = storage.public_url_for_path(cover_path, str(request.base_url))
             plan["preview_type"] = "rendered_clip"
             plan["render_features"] = [
                 "smart_trim",

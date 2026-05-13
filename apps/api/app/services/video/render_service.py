@@ -92,6 +92,46 @@ def render_preview_clip(source_path: str, output_path: str, plan: dict, aspect_r
         _render_without_source_audio(ffmpeg, source_path, output_path, video_filter, duration, fade_out_start, style)
 
 
+def render_cover_image(video_path: str, output_path: str, plan: dict, aspect_ratio: str) -> None:
+    variant = int(plan.get("variant_index") or 0) % 3
+    width, height = _target_size(aspect_ratio)
+    style = _style_for_plan(plan, variant)
+    title = str((plan.get("cover") or {}).get("title") or plan.get("title") or "ClipSpark AI")
+    hook = str(plan.get("hook") or "")
+    ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    filter_chain = ",".join(
+        [
+            f"scale={width}:{height}:force_original_aspect_ratio=increase",
+            f"crop={width}:{height}",
+            style["eq"],
+            style["effect"],
+            "drawbox=x=0:y=0:w=iw:h=ih:color=black@0.18:t=fill",
+            "drawbox=x=0:y=0:w=iw:h=360:color=black@0.52:t=fill",
+            style["accent"],
+            _drawtext(title, 54, 82, 72),
+            _drawtext(hook, 58, 210, 42),
+            "drawbox=x=48:y=h-210:w=360:h=86:color=white@0.92:t=fill",
+            _drawtext("ClipSpark AI", 74, "h-188", 36, "black"),
+        ]
+    )
+    command = [
+        ffmpeg,
+        "-y",
+        "-ss",
+        "0.6",
+        "-i",
+        video_path,
+        "-frames:v",
+        "1",
+        "-vf",
+        filter_chain,
+        "-q:v",
+        "2",
+        output_path,
+    ]
+    _run(command)
+
+
 def _render_without_source_audio(
     ffmpeg: str,
     source_path: str,
@@ -285,7 +325,7 @@ def _caption_text(plan: dict, style: dict) -> str:
     return f"{style['label']} · AI 已动态选择调色、特效、背景音乐"
 
 
-def _drawtext(text: str, x: object, y: object, size: int) -> str:
+def _drawtext(text: str, x: object, y: object, size: int, color: str = "white") -> str:
     safe_text = _escape_drawtext(text[:42])
     font = _escape_drawtext_path(FONT_FILE if Path(FONT_FILE).exists() else "")
     font_part = f"fontfile='{font}':" if font else ""
@@ -293,7 +333,7 @@ def _drawtext(text: str, x: object, y: object, size: int) -> str:
         "drawtext="
         f"{font_part}"
         f"text='{safe_text}':"
-        "fontcolor=white:"
+        f"fontcolor={color}:"
         f"fontsize={size}:"
         f"x={x}:"
         f"y={y}:"
