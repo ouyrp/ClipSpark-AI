@@ -2,7 +2,16 @@
 
 import { FormEvent, useState } from "react";
 
-import { Asset, EditPlan, Project, createProject, generatePlans, uploadAsset } from "../lib/api";
+import {
+  Asset,
+  EditPlan,
+  Project,
+  createProject,
+  generatePlans,
+  rerenderEditPlan,
+  updateEditPlan,
+  uploadAsset,
+} from "../lib/api";
 
 type Step = "idle" | "creating" | "uploading" | "generating" | "done" | "error";
 
@@ -18,6 +27,8 @@ export function Generator() {
   const [project, setProject] = useState<Project | null>(null);
   const [asset, setAsset] = useState<Asset | null>(null);
   const [plans, setPlans] = useState<EditPlan[]>([]);
+  const [editingId, setEditingId] = useState("");
+  const [editError, setEditError] = useState("");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -57,10 +68,58 @@ export function Generator() {
 
   const isWorking = ["creating", "uploading", "generating"].includes(step);
 
+  async function applyPlanEdit(item: EditPlan) {
+    setEditingId(item.id);
+    setEditError("");
+    try {
+      const updated = await updateEditPlan(item.id, {
+        title: String(item.plan.title ?? ""),
+        hook: String(item.plan.hook ?? ""),
+        caption_lines: normalizeCaptionLines(item.plan.caption_lines),
+        visual_style: String(item.plan.visual_style ?? "vivid_pain_point"),
+        effect_style: String(item.plan.effect_style ?? "vignette_focus"),
+        bgm_style: String(item.plan.bgm?.style ?? "tech_pulse"),
+        bgm_volume: Number(item.plan.bgm?.volume ?? 0.22),
+      });
+      const rendered = await rerenderEditPlan(updated.id);
+      replacePlan(rendered);
+      if (rendered.status === "render_failed") {
+        setEditError(String(rendered.plan.render_error ?? "重渲染失败"));
+      }
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "编辑失败");
+    } finally {
+      setEditingId("");
+    }
+  }
+
+  function updateLocalPlan(id: string, updater: (plan: Record<string, any>) => Record<string, any>) {
+    setPlans((current) => current.map((item) => (item.id === id ? { ...item, plan: updater({ ...item.plan }) } : item)));
+  }
+
+  function replacePlan(next: EditPlan) {
+    setPlans((current) => current.map((item) => (item.id === next.id ? next : item)));
+  }
+
   return (
     <main className="main">
-      <section className="panel">
-        <h2>一键生成</h2>
+      <section className="intro">
+        <p className="eyebrow">AI video studio</p>
+        <h1>上传长视频，生成可预览、可微调的短片</h1>
+        <p className="introText">自动理解素材、匹配基调、渲染预览视频和封面，再按你的标题、字幕、模板和 BGM 重新出片。</p>
+        <div className="toneChips">
+          <span>电影风</span>
+          <span>动漫风</span>
+          <span>喜庆烟花</span>
+          <span>高能卡点</span>
+        </div>
+      </section>
+
+      <section className="panel generatorPanel">
+        <div className="panelTitle">
+          <span>生成设置</span>
+          <strong>01</strong>
+        </div>
         <form onSubmit={onSubmit}>
           <label className="field">
             <span className="label">项目名称</span>
@@ -127,8 +186,11 @@ export function Generator() {
         {error && <p className="muted">{error}</p>}
       </section>
 
-      <section className="panel">
-        <h2>生成结果</h2>
+      <section className="panel resultsPanel">
+        <div className="panelTitle">
+          <span>生成结果</span>
+          <strong>{plans.length || "待生成"}</strong>
+        </div>
         <div className="stack">
           {project && (
             <div className="result">
@@ -142,21 +204,25 @@ export function Generator() {
 
           {plans.map((item, index) => (
             <article className="result" key={item.id}>
-              {typeof item.plan.cover_url === "string" && (
-                <div className="coverFrame">
-                  <img className="coverImage" src={String(item.plan.cover_url)} alt={`方案 ${index + 1} 封面`} />
-                </div>
-              )}
-              {typeof item.plan.preview_url === "string" && (
-                <div className="previewFrame">
-                  <video
-                    className="previewVideo"
-                    controls
-                    preload="metadata"
-                    src={buildPreviewUrl(item.plan)}
-                  />
-                </div>
-              )}
+              <div className="mediaPair">
+                {typeof item.plan.cover_url === "string" && (
+                  <div className="coverFrame">
+                    <img className="coverImage" src={String(item.plan.cover_url)} alt={`方案 ${index + 1} 封面`} />
+                    <span className="mediaBadge">Cover</span>
+                  </div>
+                )}
+                {typeof item.plan.preview_url === "string" && (
+                  <div className="previewFrame">
+                    <video
+                      className="previewVideo"
+                      controls
+                      preload="metadata"
+                      src={buildPreviewUrl(item.plan)}
+                    />
+                    <span className="durationBadge">{item.duration_seconds ?? item.plan.duration ?? "-"}s</span>
+                  </div>
+                )}
+              </div>
               <h3>方案 {index + 1}：{String(item.plan.title ?? "未命名方案")}</h3>
               <p>{String(item.plan.hook ?? "暂无钩子文案")}</p>
               <p className="muted">时长：{item.duration_seconds ?? item.plan.duration ?? "-"} 秒</p>
@@ -174,12 +240,99 @@ export function Generator() {
               {item.plan.analysis_summary && <p className="muted">素材理解：{String(item.plan.analysis_summary)}</p>}
               {item.plan.strategy_note && <p className="muted">策略：{String(item.plan.strategy_note)}</p>}
               <p className="muted">{String(item.plan.publish_copy?.caption ?? "")}</p>
+              <div className="editBox">
+                <label className="field">
+                  <span className="label">标题修改</span>
+                  <input
+                    className="input"
+                    value={String(item.plan.title ?? "")}
+                    onChange={(event) =>
+                      updateLocalPlan(item.id, (plan) => ({
+                        ...plan,
+                        title: event.target.value,
+                        cover: { ...(typeof plan.cover === "object" ? plan.cover : {}), title: event.target.value },
+                      }))
+                    }
+                  />
+                </label>
+                <label className="field">
+                  <span className="label">字幕轻量编辑</span>
+                  <textarea
+                    className="textarea"
+                    value={normalizeCaptionLines(item.plan.caption_lines).join("\n")}
+                    onChange={(event) =>
+                      updateLocalPlan(item.id, (plan) => ({ ...plan, caption_lines: event.target.value.split("\n") }))
+                    }
+                  />
+                </label>
+                <div className="editGrid">
+                  <label className="field">
+                    <span className="label">模板选择</span>
+                    <select
+                      className="select"
+                      value={String(item.plan.visual_style ?? "vivid_pain_point")}
+                      onChange={(event) => updateLocalPlan(item.id, (plan) => ({ ...plan, visual_style: event.target.value }))}
+                    >
+                      <option value="vivid_pain_point">痛点大字版</option>
+                      <option value="fast_impact">高能卡点版</option>
+                      <option value="clean_product">干净产品版</option>
+                      <option value="festival_bright">喜庆烟花版</option>
+                      <option value="cinematic_warm">电影质感版</option>
+                      <option value="anime_pop">动漫弹出版</option>
+                    </select>
+                  </label>
+                  <label className="field">
+                    <span className="label">BGM 配置</span>
+                    <select
+                      className="select"
+                      value={String(item.plan.bgm?.style ?? "tech_pulse")}
+                      onChange={(event) =>
+                        updateLocalPlan(item.id, (plan) => ({ ...plan, bgm: { ...(plan.bgm ?? {}), style: event.target.value } }))
+                      }
+                    >
+                      <option value="tech_pulse">科技律动</option>
+                      <option value="upbeat_drive">高能节奏</option>
+                      <option value="warm_brand">温暖品牌</option>
+                      <option value="festival_pulse">喜庆热闹</option>
+                      <option value="cinematic_rise">电影铺垫</option>
+                      <option value="anime_upbeat">动漫活力</option>
+                    </select>
+                  </label>
+                </div>
+                <label className="field">
+                  <span className="label">BGM 音量：{Number(item.plan.bgm?.volume ?? 0.22).toFixed(2)}</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="0.8"
+                    step="0.01"
+                    value={Number(item.plan.bgm?.volume ?? 0.22)}
+                    onChange={(event) =>
+                      updateLocalPlan(item.id, (plan) => ({
+                        ...plan,
+                        bgm: { ...(plan.bgm ?? {}), volume: Number(event.target.value) },
+                      }))
+                    }
+                  />
+                </label>
+                <button className="button" type="button" disabled={editingId === item.id} onClick={() => applyPlanEdit(item)}>
+                  {editingId === item.id ? "重渲染中..." : "应用并重渲染"}
+                </button>
+              </div>
+              {editError && <p className="muted">{editError}</p>}
             </article>
           ))}
         </div>
       </section>
     </main>
   );
+}
+
+function normalizeCaptionLines(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.map((line) => String(line)).filter(Boolean);
+  }
+  return [];
 }
 
 function stepLabel(step: Step) {

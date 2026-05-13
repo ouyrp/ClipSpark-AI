@@ -78,3 +78,28 @@ export function generatePlans(input: {
     }),
   });
 }
+
+export function updateEditPlan(
+  editPlanId: string,
+  payload: {
+    title?: string;
+    hook?: string;
+    caption_lines?: string[];
+    visual_style?: string;
+    effect_style?: string;
+    bgm_style?: string;
+    bgm_volume?: number;
+  },
+) {
+  return request<EditPlan>(`/edit-plans/${editPlanId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function rerenderEditPlan(editPlanId: string) {
+  return request<EditPlan>(`/edit-plans/${editPlanId}/render`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+}

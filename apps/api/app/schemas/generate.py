@@ -25,3 +25,13 @@ class EditPlanRead(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class EditPlanUpdate(BaseModel):
+    title: Optional[str] = None
+    hook: Optional[str] = None
+    caption_lines: Optional[list[str]] = None
+    visual_style: Optional[str] = None
+    effect_style: Optional[str] = None
+    bgm_style: Optional[str] = None
+    bgm_volume: Optional[float] = None
