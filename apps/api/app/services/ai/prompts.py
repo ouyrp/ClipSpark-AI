@@ -19,8 +19,9 @@ def build_edit_plan_prompt(context: dict) -> str:
 11. bgm.style 必须从素材库 bgm_styles 中选择。
 12. 根据素材分析结果决定剪辑节奏、特效和字幕层，不要只套固定模板。
 13. 如果视觉分析提示喜庆、舞台、活动、婚礼、节日，可以优先使用 fireworks/sparkle 类效果。
-10. caption_lines 给 2 到 3 条适合叠加到视频里的短字幕。
-11. 如果素材缺少字幕，先按通用口播/产品介绍视频生成可执行剪辑策略。
+14. 使用 strategy_intelligence 里的行业策略、爆款样本、历史反馈和风格匹配结果优化剪辑。
+15. caption_lines 给 2 到 3 条适合叠加到视频里的短字幕。
+16. 如果素材缺少字幕，先按通用口播/产品介绍视频生成可执行剪辑策略。
 
 素材上下文：
 {json.dumps(context, ensure_ascii=False, indent=2)}

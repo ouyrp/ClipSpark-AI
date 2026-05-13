@@ -167,6 +167,7 @@ export function Generator() {
                 </p>
               )}
               {item.plan.analysis_summary && <p className="muted">素材理解：{String(item.plan.analysis_summary)}</p>}
+              {item.plan.strategy_note && <p className="muted">策略：{String(item.plan.strategy_note)}</p>}
               <p className="muted">{String(item.plan.publish_copy?.caption ?? "")}</p>
             </article>
           ))}

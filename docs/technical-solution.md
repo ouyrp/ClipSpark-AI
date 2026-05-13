@@ -719,6 +719,51 @@ OSS_ACCESS_KEY_SECRET=
 
 ## 13. 后续演进
 
+### 13.0 智能策略闭环
+
+当前项目已预留智能策略层，用于把“素材理解”和“剪辑策略”连接起来。
+
+能力组成：
+
+- 视觉理解：上传后抽取关键帧，调用视觉模型总结场景、情绪和推荐效果。
+- 历史爆款样本：内置行业样本库，包含开场模式、节奏、字幕风格和结构。
+- 行业策略：根据项目名称、用户目标和素材分析推断行业，选择对应剪辑策略。
+- 用户反馈：读取项目历史生成结果，提取偏好风格；后续可接入下载、点赞、重生成、手动编辑等显式反馈。
+- Embedding 检索：当前使用本地轻量向量做风格匹配，生产环境可替换为百炼 `text-embedding-v4` 和向量数据库。
+
+生成链路：
+
+```mermaid
+flowchart LR
+  A["素材"] --> B["抽音频/抽关键帧"]
+  B --> C["视觉理解/ASR 状态"]
+  C --> D["行业识别"]
+  D --> E["爆款样本检索"]
+  E --> F["Embedding 风格匹配"]
+  F --> G["用户反馈偏好"]
+  G --> H["百炼生成 Edit Plan"]
+  H --> I["FFmpeg 按风格渲染"]
+```
+
+当前实现位置：
+
+```text
+apps/api/app/services/intelligence/
+  industry_strategy.py   # 行业识别和行业策略
+  viral_samples.py       # 历史爆款样本库
+  feedback.py            # 用户反馈信号
+  embedding.py           # 轻量风格向量检索
+  strategy.py            # 策略上下文聚合
+```
+
+生产增强建议：
+
+- 将 `viral_samples.py` 迁移到数据库或 CMS，支持运营配置。
+- 将本地 `embedding.py` 替换为百炼 Embedding + pgvector/Milvus。
+- 为 `EditPlan` 增加用户行为字段，如 selected、downloaded、edited、regenerated。
+- 对不同行业建立独立模板和效果权重。
+- 将分析和渲染移入异步 Worker，避免长视频阻塞 API。
+
 ### 13.1 从下载到发布
 
 先实现下载，后续逐步接入：

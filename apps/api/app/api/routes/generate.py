@@ -12,6 +12,7 @@ from app.schemas.generate import EditPlanRead, GenerateRequest
 from app.services.ai.bailian_provider import BailianProvider
 from app.services.ai.fallback import fallback_edit_plans
 from app.services.effects.library import effect_options_for_prompt
+from app.services.intelligence.strategy import build_intelligence_context
 from app.services.storage.local_storage import LocalStorage
 from app.services.video.analysis import analyze_asset
 from app.services.video.render_service import render_preview_clip
@@ -50,6 +51,7 @@ def generate(project_id: str, payload: GenerateRequest, request: Request, db: Se
         asset.duration_seconds,
         str(request.base_url),
     )
+    context["strategy_intelligence"] = build_intelligence_context(context, db)
 
     try:
         plans = BailianProvider().generate_edit_plans(context)
@@ -131,6 +133,7 @@ def _prepare_plan_variant(
         bgm.setdefault("style", bgm_styles[index % len(bgm_styles)])
     bgm.setdefault("volume", 0.22)
     plan.setdefault("analysis_summary", asset_analysis.get("summary", "AI 已完成素材理解并生成剪辑策略。"))
+    plan.setdefault("strategy_note", "已结合视觉理解、行业策略、爆款样本、历史反馈和风格检索生成。")
     if not isinstance(plan.get("caption_lines"), list):
         plan["caption_lines"] = [
             ["痛点放大", "AI 自动剪辑", "直接生成可发布版本"],
