@@ -355,11 +355,21 @@ export function Generator() {
     const isWorking = ["creating", "uploading", "generating"].includes(step);
     return (
       <main className="main">
-        <section className="intro">
-          <p className="eyebrow">AI video studio</p>
-          <h1>上传长视频，生成可预览、可微调的短片</h1>
-          <p className="introText">自动理解素材、匹配基调、渲染预览视频和封面，再按你的标题、字幕、模板和 BGM 重新出片。</p>
-          <div className="toneChips">{templates.slice(0, 4).map((item) => <span key={item.id}>{item.tags[0]}</span>)}</div>
+        <section className="homeHero">
+          <div className="heroCopy">
+            <p className="eyebrow">AI video studio</p>
+            <h1>把长视频变成可发布短片</h1>
+            <p className="introText">上传素材后，自动完成素材理解、剪辑策略、封面、字幕、BGM 和预览渲染。</p>
+            <div className="heroActions">
+              <button className="button compactButton" type="button" onClick={() => setView("templates")}>选择模板</button>
+              <button className="ghostButton" type="button" onClick={() => setView("analysis")}>先分析素材</button>
+            </div>
+          </div>
+          <div className="heroBoard">
+            <div className="heroMetric"><strong>3</strong><span>自动生成方案</span></div>
+            <div className="heroMetric"><strong>9:16</strong><span>默认竖屏出片</span></div>
+            <div className="heroMetric"><strong>AI</strong><span>视觉理解 + 策略</span></div>
+          </div>
         </section>
 
         <section className="panel generatorPanel">
@@ -375,7 +385,7 @@ export function Generator() {
           <div className="panelTitle"><span>生成结果</span><strong>{plans.length || "待生成"}</strong></div>
           <div className="stack">
             {project && <ProjectSummary project={project} asset={asset} />}
-            {plans.length === 0 && <p className="muted">上传视频后，这里会展示 AI 生成的 3 条短视频剪辑方案。</p>}
+            {plans.length === 0 && <EmptyWorkbench />}
             {plans.map((item, index) => <PlanCard item={item} index={index} key={item.id} editable />)}
           </div>
         </section>
@@ -688,6 +698,27 @@ function ProjectSummary({ project, asset }: { project: Project; asset: Asset | n
       <h3>{project.name}</h3>
       <p className="muted">项目 ID：{project.id}</p>
       {asset && <p className="muted">素材：{asset.filename} · {asset.duration_seconds ?? "-"}s</p>}
+    </div>
+  );
+}
+
+function EmptyWorkbench() {
+  return (
+    <div className="emptyWorkbench">
+      <div className="timelineHeader">
+        <strong>等待素材</strong>
+        <span>上传后这里会生成 3 条可预览短片</span>
+      </div>
+      <div className="mockPreviewRow">
+        <div className="mockPhone"><span>痛点开场</span></div>
+        <div className="mockPhone"><span>高能卡点</span></div>
+        <div className="mockPhone"><span>产品卖点</span></div>
+      </div>
+      <div className="timelineTracks">
+        <span />
+        <span />
+        <span />
+      </div>
     </div>
   );
 }

@@ -124,7 +124,7 @@ button {
 .main {
   width: min(1240px, calc(100% - 56px));
   margin: 0 auto;
-  padding: 30px 0 52px;
+  padding: 22px 0 52px;
   display: grid;
   grid-template-columns: 390px 1fr;
   grid-template-areas:
@@ -142,6 +142,70 @@ button {
 .intro {
   grid-area: intro;
   padding: 26px 0 8px;
+}
+
+.homeHero {
+  grid-area: intro;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.75fr);
+  gap: 22px;
+  align-items: stretch;
+  padding: 18px 0 4px;
+}
+
+.heroCopy,
+.heroBoard {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow);
+}
+
+.heroCopy {
+  padding: 28px;
+}
+
+.heroCopy h1 {
+  margin: 0;
+  max-width: 720px;
+  font-size: 44px;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.heroBoard {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+  background:
+    linear-gradient(135deg, rgba(226, 244, 255, 0.92), rgba(255, 255, 255, 0.95));
+}
+
+.heroMetric {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 16px;
+}
+
+.heroMetric strong {
+  display: block;
+  color: var(--brand-strong);
+  font-size: 30px;
+  line-height: 1;
+  margin-bottom: 7px;
+}
+
+.heroMetric span {
+  color: var(--muted);
+  font-weight: 800;
 }
 
 .eyebrow {
@@ -288,6 +352,16 @@ button {
   display: inline-flex;
 }
 
+.ghostButton {
+  border: 1px solid var(--line-bright);
+  border-radius: 6px;
+  padding: 11px 16px;
+  background: #fff;
+  color: var(--brand-strong);
+  cursor: pointer;
+  font-weight: 800;
+}
+
 .stack {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -319,6 +393,81 @@ button {
 
 .result:first-child {
   grid-column: 1 / -1;
+}
+
+.emptyWorkbench {
+  grid-column: 1 / -1;
+  border: 1px dashed #a9cfee;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(239, 248, 255, 0.92), rgba(255, 255, 255, 0.95));
+  padding: 18px;
+}
+
+.timelineHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.timelineHeader span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.mockPreviewRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mockPhone {
+  aspect-ratio: 9 / 16;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(160deg, rgba(31, 143, 255, 0.18), rgba(255, 255, 255, 0.94)),
+    #eaf6ff;
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+  min-height: 180px;
+}
+
+.mockPhone span {
+  width: 100%;
+  border-radius: 6px;
+  background: rgba(17, 33, 54, 0.78);
+  color: #fff;
+  padding: 8px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.timelineTracks {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.timelineTracks span {
+  display: block;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7cc3ff, #d9efff);
+}
+
+.timelineTracks span:nth-child(2) {
+  width: 72%;
+  background: linear-gradient(90deg, #43c6e8, #d9efff);
+}
+
+.timelineTracks span:nth-child(3) {
+  width: 48%;
+  background: linear-gradient(90deg, #14a36f, #d9efff);
 }
 
 .mediaPair {
@@ -558,6 +707,10 @@ button {
 }
 
 @media (max-width: 1020px) {
+  .homeHero {
+    grid-template-columns: 1fr;
+  }
+
   .main {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -594,9 +747,14 @@ button {
     font-size: 31px;
   }
 
+  .heroCopy h1 {
+    font-size: 32px;
+  }
+
   .stack,
   .editGrid,
   .mediaPair,
+  .mockPreviewRow,
   .templateGrid,
   .workGrid,
   .analysisGrid,
