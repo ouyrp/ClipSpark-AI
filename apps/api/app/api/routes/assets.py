@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -7,6 +7,7 @@ from app.models.asset import Asset
 from app.models.project import Project
 from app.schemas.asset import AssetRead
 from app.services.storage.local_storage import LocalStorage
+from app.services.video.analysis import analyze_asset
 from app.services.video.probe import probe_video
 
 router = APIRouter(prefix="/projects/{project_id}/assets", tags=["assets"])
@@ -43,3 +44,20 @@ def upload_asset(project_id: str, file: UploadFile = File(...), db: Session = De
 @router.get("", response_model=list[AssetRead])
 def list_assets(project_id: str, db: Session = Depends(get_db)) -> list[Asset]:
     return list(db.scalars(select(Asset).where(Asset.project_id == project_id).order_by(Asset.created_at.desc())).all())
+
+
+@router.post("/{asset_id}/analyze")
+def analyze_uploaded_asset(project_id: str, asset_id: str, request: Request, db: Session = Depends(get_db)) -> dict:
+    asset = db.get(Asset, asset_id)
+    if not asset or asset.project_id != project_id:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    analysis = analyze_asset(asset.original_url, asset.duration_seconds, str(request.base_url))
+    return {
+        "asset_id": asset.id,
+        "filename": asset.filename,
+        "duration_seconds": asset.duration_seconds,
+        "width": asset.width,
+        "height": asset.height,
+        "fps": asset.fps,
+        "analysis": analysis,
+    }

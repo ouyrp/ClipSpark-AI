@@ -33,6 +33,10 @@ textarea {
   font: inherit;
 }
 
+button {
+  appearance: none;
+}
+
 .shell {
   min-height: 100vh;
   background:
@@ -69,7 +73,12 @@ textarea {
 }
 
 .navItem {
+  border: 0;
+  background: transparent;
   color: #526985;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 8px 0;
 }
 
 .navItem.active {
@@ -97,10 +106,14 @@ textarea {
 }
 
 .subnavItem {
+  border: 0;
+  background: transparent;
   height: 100%;
   display: inline-flex;
   align-items: center;
   color: #657991;
+  cursor: pointer;
+  font-weight: 800;
 }
 
 .subnavItem.active {
@@ -118,6 +131,12 @@ textarea {
     "intro intro"
     "form results";
   gap: 22px 24px;
+}
+
+.wideMain {
+  width: min(1240px, calc(100% - 56px));
+  margin: 0 auto;
+  padding: 30px 0 52px;
 }
 
 .intro {
@@ -264,6 +283,11 @@ textarea {
   opacity: 0.55;
 }
 
+.compactButton {
+  width: auto;
+  display: inline-flex;
+}
+
 .stack {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -373,6 +397,134 @@ textarea {
   font-weight: 800;
 }
 
+.templateGrid,
+.workGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.templateCard,
+.workCard,
+.emptyPanel {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.templateCard h3,
+.workCard h3 {
+  margin: 12px 0 8px;
+  font-size: 20px;
+}
+
+.templateCard p,
+.workCard p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.templatePreview {
+  height: 150px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, #d7ecff, #ffffff);
+}
+
+.templatePreview.cinematic {
+  background: linear-gradient(135deg, #b9d8f1 0%, #fff5dd 100%);
+}
+
+.templatePreview.anime {
+  background: linear-gradient(135deg, #d8ecff 0%, #ffe4f4 55%, #fff 100%);
+}
+
+.templatePreview.festival {
+  background: linear-gradient(135deg, #ffe6ec 0%, #dff1ff 100%);
+}
+
+.templatePreview.high_energy {
+  background: linear-gradient(135deg, #d9efff 0%, #b9ddff 50%, #fff 100%);
+}
+
+.templatePreview.clean_product {
+  background: linear-gradient(135deg, #eef8ff 0%, #ffffff 100%);
+}
+
+.analysisGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.infoRow {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card-soft);
+  padding: 12px;
+}
+
+.infoRow.wide {
+  grid-column: 1 / -1;
+}
+
+.infoRow span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.infoRow strong {
+  display: block;
+  line-height: 1.5;
+}
+
+.frameStrip {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.frameStrip img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.miniPreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.miniPreview {
+  min-width: 0;
+}
+
+.miniPreview img {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--card-soft);
+}
+
+.miniPreview strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 @media (max-width: 1020px) {
   .main {
     grid-template-columns: 1fr;
@@ -412,7 +564,12 @@ textarea {
 
   .stack,
   .editGrid,
-  .mediaPair {
+  .mediaPair,
+  .templateGrid,
+  .workGrid,
+  .analysisGrid,
+  .frameStrip,
+  .miniPreviewGrid {
     grid-template-columns: 1fr;
   }
 

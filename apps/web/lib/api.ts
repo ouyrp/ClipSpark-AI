@@ -14,6 +14,10 @@ export type Asset = {
   type: string;
   filename: string;
   original_url: string;
+  duration_seconds: number | null;
+  width: number | null;
+  height: number | null;
+  fps: number | null;
   created_at: string;
 };
 
@@ -54,6 +58,25 @@ export function uploadAsset(projectId: string, file: File) {
   return request<Asset>(`/projects/${projectId}/assets`, {
     method: "POST",
     body: formData,
+  });
+}
+
+export function listProjects() {
+  return request<Project[]>("/projects");
+}
+
+export function listAssets(projectId: string) {
+  return request<Asset[]>(`/projects/${projectId}/assets`);
+}
+
+export function listEditPlans(projectId: string) {
+  return request<EditPlan[]>(`/projects/${projectId}/generate/plans`);
+}
+
+export function analyzeAsset(projectId: string, assetId: string) {
+  return request<Record<string, any>>(`/projects/${projectId}/assets/${assetId}/analyze`, {
+    method: "POST",
+    body: JSON.stringify({}),
   });
 }
 
