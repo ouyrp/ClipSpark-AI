@@ -121,8 +121,11 @@ def _build_summary(asr: dict, vision: dict) -> str:
 
 
 def _describe_ai_error(exc: Exception) -> str:
+    settings = get_settings()
     error_text = str(exc).lower()
     if "invalid_api_key" in error_text or "incorrect api key" in error_text or "401" in error_text:
+        if settings.dashscope_api_key.startswith("sk-sp-"):
+            return "当前配置的是 Coding Plan 专属 sk-sp Key，不能和百炼通用 API Base URL 混用"
         return "百炼 API Key 认证失败"
     if "model" in error_text and ("not" in error_text or "access" in error_text or "permission" in error_text):
         return "视觉模型名称或权限不可用"
